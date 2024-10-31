@@ -43,8 +43,9 @@
       <label>Velocidade do Motor:</label>
       <span id="velocidade_motor_realtime">0</span>
     </div>
+    <button onclick="window.location.href='configuracoes.html'">Configurações</button>
   </div>
-  <script src="(link unavailable)"></script>
+  <script src="script.js"></script>
   <script>
     const mqtt = require('mqtt');
 
@@ -80,6 +81,9 @@
   </script>
 </body>
 </html>
+
+
+Configurações HTML:
 
 
 <!DOCTYPE html>
@@ -119,7 +123,7 @@
         <option value="A">Automático</option>
       </select>
       <label class="label" for="velocidade_motor">Velocidade do Motor (Manual):</label>
-      <input class="input" type="range" id="velocidade_motor" min="0" max="255" value="0">
+<input class="input" type="range" id="velocidade_motor" min="0" max="255" value="0">
       <span id="velocidade_motor_valor">0</span>
       <br>
       <label class="label" for="setpoint">Setpoint (Automático):</label>
@@ -137,12 +141,12 @@
       <button class="botao-enviar" id="enviar">Enviar</button>
     </form>
   </div>
-  <script src="(link unavailable)"></script>
+  <script src="script.js"></script>
   <script>
     const mqtt = require('mqtt');
 
     // Conectar ao broker MQTT
-    const client = mqtt.connect('broker.hivemq.com');
+    const client = mqtt.connect('mqtt://endereco_do_broker');
 
     // Enviar dados para o ESP32/ESP8266
     document.getElementById('enviar').addEventListener('click', () => {

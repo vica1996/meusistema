@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Controle de Nível de Caixa</title>
+  <style>
+    body {
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      width: 80%;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+    }
+    .data-hora {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Controle de Nível de Caixa</h1>
+    <div class="data-hora" id="data-hora"></div>
+  </div>
+  <div class="container">
+    <div style="text-align: center;">
+      <label>Nível da Caixa:</label>
+      <span id="nivel_caixa">0</span>%
+    </div>
+    <div style="text-align: center;">
+      <label>Velocidade do Motor:</label>
+      <span id="velocidade_motor_realtime">0</span>
+    </div>
+  </div>
+  <script src="(link unavailable)"></script>
+  <script>
+    const mqtt = require('mqtt');
+
+    // Conectar ao broker MQTT
+    const client = mqtt.connect('mqtt://endereco_do_broker');
+
+    // Receber dados do ESP32/ESP8266
+    client.on('connect', () => {
+      client.subscribe('nivel_caixa');
+      client.subscribe('velocidade_motor_realtime');
+    });
+
+    client.on('message', (topic, message) => {
+      if (topic === 'nivel_caixa') {
+        document.getElementById('nivel_caixa').innerHTML = message.toString();
+      } else if (topic === 'velocidade_motor_realtime') {
+        document.getElementById('velocidade_motor_realtime').innerHTML = message.toString();
+      }
+    });
+
+    // Atualizar data e hora
+    function atualizarDataHora() {
+      const data = new Date();
+      const dia = data.getDate().toString().padStart(2, '0');
+      const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+      const ano = data.getFullYear();
+      const hora = data.getHours().toString().padStart(2, '0');
+      const minutos = data.getMinutes().toString().padStart(2, '0');
+      const segundos = data.getSeconds().toString().padStart(2, '0');
+      document.getElementById('data-hora').innerHTML = `${dia}/${mes}/${ano} ${hora}:${minutos}:${segundos}`;
+    }
+    setInterval(atualizarDataHora, 1000);
+  </script>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Configurações do Controle de Nível de Caixa</title>
+  <style>
+    body {
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      width: 80%;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Configurações do Controle de Nível de Caixa</h1>
+  </div>
+  <div class="container">
+    <form>
+      <label class="label" for="modo_operacao">Modo de Operação:</label>
+      <select class="input" id="modo_operacao">
+        <option value="M">Manual</option>
+        <option value="A">Automático</option>
+      </select>
+      <label class="label" for="velocidade_motor">Velocidade do Motor (Manual):</label>
+      <input class="input" type="range" id="velocidade_motor" min="0" max="255" value="0">
+      <span id="velocidade_motor_valor">0</span>
+      <br>
+      <label class="label" for="setpoint">Setpoint (Automático):</label>
+      <input class="input" type="number" id="setpoint" value="50">
+      <br>
+      <label class="label" for="kp">Ganho Proporcional (Automático):</label>
+      <input class="input" type="number" id="kp" value="2.0">
+      <br>
+      <label class="label" for="ki">Ganho Integral (Automático):</label>
+      <input class="input" type="number" id="ki" value="1.0">
+      <br>
+      <label class="label" for="kd">Ganho Derivativo (Automático):</label>
+      <input class="input" type="number" id="kd" value="0.5">
+      <br>
+      <button class="botao-enviar" id="enviar">Enviar</button>
+    </form>
+  </div>
+  <script src="(link unavailable)"></script>
+  <script>
+    const mqtt = require('mqtt');
+
+    // Conectar ao broker MQTT
+    const client = mqtt.connect('broker.hivemq.com');
+
+    // Enviar dados para o ESP32/ESP8266
+    document.getElementById('enviar').addEventListener('click', () => {
+      const modoOperacao = document.getElementById('modo_operacao').value;
+      const velocidadeMotor = document.getElementById('velocidade_motor').value;
+      const setpoint = document.getElementById('setpoint').value;
+      const kp = document.getElementById('kp').value;
+      const ki = document.getElementById('ki').value;
+      const kd = document.getElementById('kd').value;
+
+      client.publish('modo_operacao', modoOperacao);
+      client.publish('velocidade_motor', velocidadeMotor);
+      client.publish('setpoint', setpoint);
+      client.publish('kp', kp);
+      client.publish('ki', ki);
+      client.publish('kd', kd);
+    });
+
+    // Atualizar valor da velocidade do motor
+    document.getElementById('velocidade_motor').addEventListener('input', () => {
+      const velocidadeMotor = document.getElementById('velocidade_motor').value;
+      client.publish('velocidade_motor', velocidadeMotor);
+      document.getElementById('velocidade_motor_valor').innerHTML = velocidadeMotor;
+    });
+  </script>
+</body>
+</html>
